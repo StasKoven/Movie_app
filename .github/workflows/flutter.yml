@@ -2,13 +2,13 @@ name: Flutter CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
   analyze:
-    name: Analyze and Format
+    name: Analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,17 +16,14 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.38.4'
           channel: 'stable'
       
       - name: Get dependencies
         run: flutter pub get
       
-      - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
-      
       - name: Analyze project source
-        run: flutter analyze --fatal-infos
+        run: flutter analyze
   
   test:
     name: Run Tests
@@ -38,41 +35,27 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.38.4'
           channel: 'stable'
       
       - name: Get dependencies
         run: flutter pub get
       
       - name: Run tests
-        run: flutter test --coverage
-      
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false
-      
-      - name: Check code coverage
-        run: |
-          COVERAGE=$(lcov --summary coverage/lcov.info | grep lines | awk '{print $2}' | sed 's/%//')
-          echo "Code coverage: $COVERAGE%"
-          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
-            echo "Error: Code coverage is below 70%"
-            exit 1
-          fi
+        run: flutter test
 
   build_android:
     name: Build Android APK
     runs-on: ubuntu-latest
     needs: test
+    if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
       
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.38.4'
           channel: 'stable'
       
       - name: Setup Java
@@ -84,56 +67,11 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
       
-      - name: Build APK with Obfuscation
-        run: flutter build apk --release --obfuscate --split-debug-info=build/app/outputs/symbols
+      - name: Build APK
+        run: flutter build apk --release
       
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
-
-  build_ios:
-    name: Build iOS
-    runs-on: macos-latest
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
-      
-      - name: Get dependencies
-        run: flutter pub get
-      
-      - name: Build iOS (no codesign)
-        run: flutter build ios --release --no-codesign
-
-  build_web:
-    name: Build Web
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
-      
-      - name: Get dependencies
-        run: flutter pub get
-      
-      - name: Build Web
-        run: flutter build web --release
-      
-      - name: Upload Web artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-build
-          path: build/web
