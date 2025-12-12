@@ -1,0 +1,8 @@
+targets:
+  $default:
+    builders:
+      injectable_generator:injectable_builder:
+        enabled: true
+      
+      hive_generator:hive_generator:
+        enabled: true
