@@ -41,8 +41,28 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
       
-      - name: Run tests
-        run: flutter test
+      - name: Run tests with coverage
+        run: flutter test --coverage
+      
+      - name: Install lcov
+        run: sudo apt-get install -y lcov
+      
+      - name: Check coverage threshold
+        run: |
+          COVERAGE=$(lcov --summary coverage/lcov.info 2>&1 | grep "lines" | awk '{print $2}' | sed 's/%//')
+          echo "Test Coverage: $COVERAGE%"
+          if (( $(echo "$COVERAGE < 70.0" | bc -l) )); then
+            echo "❌ Coverage $COVERAGE% is below required 70%"
+            exit 1
+          else
+            echo "✅ Coverage $COVERAGE% meets the 70% requirement"
+          fi
+      
+      - name: Upload coverage to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/lcov.info
 
   build_android:
     name: Build Android APK

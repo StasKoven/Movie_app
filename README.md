@@ -91,12 +91,15 @@ movie_discovery/
 - Code generation
 - Lazy singletons
 
-## 🌐 API Integration
+## 🌐 API Integration & Local Storage
 
 - **TMDB API**: Movie data, search, details
-- **Dio**: HTTP client with interceptors
-- **Offline caching**: Hive + Drift
-- **Error handling**: Retry mechanisms
+- **Dio**: HTTP client with interceptors & logging
+- **Offline-first caching**: 
+  - **Drift (SQLite)** - Primary movie data cache with 1-hour freshness
+  - **Hive** - Favorites + user preferences
+  - **flutter_secure_storage** - API keys, tokens
+- **Error handling**: Retry mechanisms with fallback to cache
 
 **Test Types:**
 - ✅ Unit tests (domain use cases)
