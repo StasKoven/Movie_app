@@ -1,8 +1,5 @@
-import 'dart:convert';
 import 'package:dartz/dartz.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:injectable/injectable.dart';
-import '../../../../core/database/app_database.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/network/network_info.dart';
@@ -10,7 +7,6 @@ import '../datasources/movie_local_data_source.dart';
 import '../datasources/movie_remote_data_source.dart';
 import '../models/movie_detail_model.dart';
 import '../models/movie_list_response.dart';
-import '../models/movie_model.dart';
 import '../models/review_model.dart';
 import '../models/video_model.dart';
 
@@ -37,13 +33,11 @@ class MovieRepositoryImpl implements MovieRepository {
   final MovieRemoteDataSource remoteDataSource;
   final MovieLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
-  final AppDatabase database;
 
   MovieRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
     required this.networkInfo,
-    required this.database,
   });
 
   @override
@@ -174,40 +168,15 @@ class MovieRepositoryImpl implements MovieRepository {
     String cacheKey,
     Future<MovieListResponse> Function() getFromRemote,
   ) async {
-    final category = cacheKey.split('_').first;
-    
     if (await networkInfo.isConnected) {
       try {
         final result = await getFromRemote();
-        
-        // Cache in Hive (existing cache)
         await localDataSource.cacheMovieList(cacheKey, result);
-        
-        // Cache in SQLite database
-        await _cacheMoviesInDatabase(result.results, category);
-        
         return Right(result);
       } on ServerException catch (e) {
         return Left(ServerFailure(e.message));
       }
     } else {
-      // Try SQLite cache first
-      try {
-        final cachedMovies = await database.getCachedMoviesByCategory(category);
-        if (cachedMovies.isNotEmpty) {
-          final movieList = _convertCachedMoviesToModels(cachedMovies);
-          return Right(MovieListResponse(
-            page: 1,
-            results: movieList,
-            totalPages: 1,
-            totalResults: movieList.length,
-          ));
-        }
-      } catch (e) {
-        // Fall through to Hive cache
-      }
-      
-      // Fallback to Hive cache
       try {
         final cachedResult = await localDataSource.getCachedMovieList(cacheKey);
         if (cachedResult != null) {
@@ -219,49 +188,5 @@ class MovieRepositoryImpl implements MovieRepository {
         return Left(CacheFailure(e.message));
       }
     }
-  }
-  
-  Future<void> _cacheMoviesInDatabase(List<MovieModel> movies, String category) async {
-    final companions = movies.map((movie) {
-      return CachedMoviesCompanion(
-        id: drift.Value(movie.id),
-        title: drift.Value(movie.title),
-        overview: drift.Value(movie.overview),
-        posterPath: drift.Value(movie.posterPath),
-        backdropPath: drift.Value(movie.backdropPath),
-        voteAverage: drift.Value(movie.voteAverage),
-        voteCount: drift.Value(movie.voteCount),
-        releaseDate: drift.Value(movie.releaseDate),
-        adult: drift.Value(movie.adult),
-        originalLanguage: drift.Value(movie.originalLanguage),
-        popularity: drift.Value(movie.popularity),
-        genreIds: drift.Value(jsonEncode(movie.genreIds)),
-        category: drift.Value(category),
-        cachedAt: drift.Value(DateTime.now()),
-      );
-    }).toList();
-    
-    await database.cacheMovies(companions);
-  }
-  
-  List<MovieModel> _convertCachedMoviesToModels(List<CachedMovy> cachedMovies) {
-    return cachedMovies.map((cached) {
-      return MovieModel(
-        id: cached.id,
-        title: cached.title,
-        overview: cached.overview,
-        posterPath: cached.posterPath,
-        backdropPath: cached.backdropPath,
-        voteAverage: cached.voteAverage,
-        voteCount: cached.voteCount,
-        releaseDate: cached.releaseDate,
-        adult: cached.adult,
-        originalLanguage: cached.originalLanguage,
-        originalTitle: cached.title, // Using title as originalTitle
-        popularity: cached.popularity,
-        genreIds: List<int>.from(jsonDecode(cached.genreIds)),
-        video: false, // Default value
-      );
-    }).toList();
   }
 }

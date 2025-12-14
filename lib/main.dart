@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,21 +19,7 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Глобальна обробка помилок Flutter
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    debugPrint('Flutter Error: ${details.exception}');
-    debugPrint('Stack trace: ${details.stack}');
-  };
 
-  // Обробка помилок поза Flutter framework
-  PlatformDispatcher.instance.onError = (error, stack) {
-    debugPrint('Platform Error: $error');
-    debugPrint('Stack trace: $stack');
-    return true;
-  };
-  
   // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

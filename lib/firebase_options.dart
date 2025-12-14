@@ -45,27 +45,27 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDemoKey-Replace-With-Your-Actual-Key',
-    appId: '1:123456789:android:abcdef123456',
-    messagingSenderId: '123456789',
-    projectId: 'movie-discovery-demo',
-    storageBucket: 'movie-discovery-demo.appspot.com',
+    apiKey: 'AIzaSyAqK7fi3duxhzuXiwTF1yI3759Icd7IemE',
+    appId: '1:579258399818:android:49933ea6a116d913527ab3',
+    messagingSenderId: '579258399818',
+    projectId: 'movie-discovery-9460c',
+    storageBucket: 'movie-discovery-9460c.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDemoKey-Replace-With-Your-Actual-Key',
-    appId: '1:123456789:ios:abcdef123456',
-    messagingSenderId: '123456789',
-    projectId: 'movie-discovery-demo',
-    storageBucket: 'movie-discovery-demo.appspot.com',
+    apiKey: 'AIzaSyAqK7fi3duxhzuXiwTF1yI3759Icd7IemE',
+    appId: '1:579258399818:ios:49933ea6a116d913527ab3',
+    messagingSenderId: '579258399818',
+    projectId: 'movie-discovery-9460c',
+    storageBucket: 'movie-discovery-9460c.firebasestorage.app',
     iosBundleId: 'com.example.movieDiscovery',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDemoKey-Replace-With-Your-Actual-Key',
-    appId: '1:123456789:windows:abcdef123456',
-    messagingSenderId: '123456789',
-    projectId: 'movie-discovery-demo',
-    storageBucket: 'movie-discovery-demo.appspot.com',
+    apiKey: 'AIzaSyAqK7fi3duxhzuXiwTF1yI3759Icd7IemE',
+    appId: '1:579258399818:windows:49933ea6a116d913527ab3',
+    messagingSenderId: '579258399818',
+    projectId: 'movie-discovery-9460c',
+    storageBucket: 'movie-discovery-9460c.firebasestorage.app',
   );
 }

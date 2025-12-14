@@ -51,7 +51,6 @@ import '../../features/home/domain/usecases/search_movies.dart' as _i114;
 import '../../features/home/presentation/bloc/movie_bloc.dart' as _i37;
 import '../../features/home/presentation/bloc/movie_detail_bloc.dart' as _i379;
 import '../../features/home/presentation/bloc/search_bloc.dart' as _i511;
-import '../database/app_database.dart' as _i982;
 import '../network/dio_client.dart' as _i667;
 import '../network/network_info.dart' as _i932;
 import 'firebase_module.dart' as _i616;
@@ -70,7 +69,6 @@ extension GetItInjectableX on _i174.GetIt {
     final firebaseModule = _$FirebaseModule();
     final networkModule = _$NetworkModule();
     gh.factory<_i667.DioClient>(() => _i667.DioClient());
-    gh.singleton<_i982.AppDatabase>(() => _i982.AppDatabase());
     gh.lazySingleton<_i59.FirebaseAuth>(() => firebaseModule.firebaseAuth);
     gh.lazySingleton<_i478.MovieLocalDataSource>(
         () => _i478.MovieLocalDataSourceImpl());
@@ -106,7 +104,6 @@ extension GetItInjectableX on _i174.GetIt {
           remoteDataSource: gh<_i200.MovieRemoteDataSource>(),
           localDataSource: gh<_i478.MovieLocalDataSource>(),
           networkInfo: gh<_i932.NetworkInfo>(),
-          database: gh<_i982.AppDatabase>(),
         ));
     gh.factory<_i429.FavoritesBloc>(() => _i429.FavoritesBloc(
           getAllFavorites: gh<_i298.GetAllFavorites>(),
