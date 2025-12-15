@@ -19,6 +19,13 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// Suppress all Java compilation warnings in all subprojects
+subprojects {
+    tasks.withType<JavaCompile>().configureEach {
+        options.compilerArgs.addAll(listOf("-Xlint:none", "-nowarn"))
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
