@@ -13,6 +13,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = false
     }
 
     kotlinOptions {
@@ -37,6 +38,14 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    lintOptions {
+        disable.add("Deprecation")
+    }
+}
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.addAll(listOf("-Xlint:none", "-nowarn"))
 }
 
 flutter {

@@ -39,7 +39,8 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   smooth_page_indicator: ^1.2.0+3
   lottie: ^3.2.0
-  youtube_player_iframe: ^5.2.1
+  pod_player: ^0.2.1
+  url_launcher: ^6.3.1
 
   # Authentication
   firebase_core: ^3.10.0

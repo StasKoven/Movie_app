@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'package:pod_player/pod_player.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../data/models/video_model.dart';
@@ -352,24 +352,51 @@ class TrailerPlayerPage extends StatefulWidget {
 }
 
 class _TrailerPlayerPageState extends State<TrailerPlayerPage> {
-  late YoutubePlayerController _controller;
+  late PodPlayerController _controller;
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _controller = YoutubePlayerController(
-      params: const YoutubePlayerParams(
-        mute: false,
-        showControls: true,
-        showFullscreenButton: true,
-      ),
-    );
-    _controller.loadVideoById(videoId: widget.video.key);
+    _initializePlayer();
+  }
+
+  Future<void> _initializePlayer() async {
+    final videoId = widget.video.key;
+    
+    try {
+      _controller = PodPlayerController(
+        playVideoFrom: PlayVideoFrom.youtube(
+          'https://www.youtube.com/watch?v=$videoId',
+        ),
+        podPlayerConfig: const PodPlayerConfig(
+          autoPlay: true,
+          isLooping: false,
+          videoQualityPriority: [720, 480, 360],
+        ),
+      );
+      
+      await _controller.initialise();
+      
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Failed to load video: $e';
+        });
+      }
+    }
   }
 
   @override
   void dispose() {
-    _controller.close();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -391,9 +418,46 @@ class _TrailerPlayerPageState extends State<TrailerPlayerPage> {
       body: SafeArea(
         child: Column(
           children: [
-            YoutubePlayer(
-              controller: _controller,
+            AspectRatio(
               aspectRatio: 16 / 9,
+              child: _isLoading
+                  ? Container(
+                      color: Colors.black,
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    )
+                  : _errorMessage != null
+                      ? Container(
+                          color: Colors.black,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  color: AppColors.primary,
+                                  size: 48,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  _errorMessage!,
+                                  style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : PodVideoPlayer(
+                          controller: _controller,
+                          videoAspectRatio: 16 / 9,
+                          alwaysShowProgressBar: true,
+                        ),
             ),
             Expanded(
               child: SingleChildScrollView(
